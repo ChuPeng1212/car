@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>臻驰汽车 · 后台管理系统</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0C0C0E;
+  --bg2: #13131A;
+  --bg3: #1A1A24;
+  --surface: #20202E;
+  --surface2: #282838;
+  --gold: #C9A84C;
+  --gold2: #E8C97A;
+  --gold-dim: rgba(201,168,76,0.12);
+  --green: #3DD68C;
+  --green-dim: rgba(61,214,140,0.12);
+  --red: #F87171;
+  --red-dim: rgba(248,113,113,0.12);
+  --blue: #60A5FA;
+  --blue-dim: rgba(96,165,250,0.12);
+  --text: #E8E6F0;
+  --text2: #A09CB0;
+  --text3: #5A5870;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(201,168,76,0.2);
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --sans: 'PingFang SC','Microsoft YaHei',sans-serif;
+  --sidebar: 240px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{height:100%}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-size:14px;
+  display:flex; height:100vh; overflow:hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar); background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  flex-shrink:0; overflow-y:auto;
+}
+.sidebar-logo{
+  padding:28px 20px 20px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.logo-mark{
+  width:32px; height:32px; background:var(--gold);
+  display:flex; align-items:center; justify-content:center;
+  font-weight:700; color:#000; font-size:14px; flex-shrink:0;
+}
+.logo-text{font-size:13px; font-weight:600; letter-spacing:0.05em; line-height:1.3;}
+.logo-sub{font-size:11px; color:var(--text2); letter-spacing:0.08em; margin-top:2px;}
+
+.sidebar-section{padding:16px 12px 6px; font-size:10px; letter-spacing:0.2em; color:var(--text3); text-transform:uppercase;}
+.nav-item{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; margin:1px 8px; border-radius:6px;
+  cursor:pointer; transition:all 0.2s; color:var(--text2);
+  font-size:13px; user-select:none;
+}
+.nav-item:hover{background:var(--bg3); color:var(--text);}
+.nav-item.active{background:var(--gold-dim); color:var(--gold); border:1px solid var(--border2);}
+.nav-icon{width:16px; text-align:center; font-size:14px; flex-shrink:0;}
+.nav-badge{
+  margin-left:auto; background:var(--gold); color:#000;
+  font-size:10px; padding:1px 6px; border-radius:10px; font-weight:600;
+}
+
+.sidebar-footer{
+  margin-top:auto; padding:16px;
+  border-top:1px solid var(--border);
+  font-size:12px; color:var(--text3);
+}
+.sidebar-footer strong{color:var(--green); margin-right:6px;}
+
+/* ── MAIN ── */
+.main{flex:1; display:flex; flex-direction:column; overflow:hidden;}
+
+.topbar{
+  height:56px; background:var(--bg2);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center;
+  padding:0 28px; gap:16px; flex-shrink:0;
+}
+.topbar-title{font-size:16px; font-weight:500; flex:1;}
+.topbar-sub{font-size:12px; color:var(--text2); margin-top:1px;}
+.topbar-actions{display:flex; gap:10px; align-items:center;}
+.btn{
+  padding:7px 16px; border-radius:5px; font-size:12px;
+  border:none; cursor:pointer; font-family:var(--sans);
+  transition:all 0.2s; letter-spacing:0.05em;
+}
+.btn-gold{background:var(--gold); color:#000; font-weight:600;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-ghost{background:var(--surface); color:var(--text2); border:1px solid var(--border);}
+.btn-ghost:hover{color:var(--text); border-color:rgba(255,255,255,0.15);}
+.btn-red{background:var(--red-dim); color:var(--red); border:1px solid rgba(248,113,113,0.2);}
+.btn-red:hover{background:rgba(248,113,113,0.2);}
+.btn-green{background:var(--green-dim); color:var(--green); border:1px solid rgba(61,214,140,0.2);}
+.btn-green:hover{background:rgba(61,214,140,0.2);}
+
+.save-status{
+  font-size:11px; padding:5px 12px; border-radius:4px;
+  background:var(--green-dim); color:var(--green);
+  border:1px solid rgba(61,214,140,0.2);
+  display:none;
+}
+.save-status.show{display:block;}
+
+/* ── CONTENT ── */
+.content{flex:1; overflow-y:auto; padding:28px;}
+
+/* Panels */
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* Cards */
+.card{
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; margin-bottom:20px; overflow:hidden;
+}
+.card-header{
+  padding:16px 20px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--bg3);
+}
+.card-title{font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;}
+.card-title-icon{color:var(--gold); font-size:14px;}
+.card-desc{font-size:11px; color:var(--text2); margin-top:2px;}
+.card-body{padding:20px;}
+
+/* Form */
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+.form-grid-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+.form-full{grid-column:1/-1;}
+.field{display:flex; flex-direction:column; gap:6px;}
+.field label{font-size:11px; letter-spacing:0.1em; color:var(--text2); text-transform:uppercase;}
+.field input,.field select,.field textarea{
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--text); font-family:var(--sans); font-size:13px;
+  padding:10px 12px; border-radius:5px; outline:none;
+  transition:border-color 0.2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold);}
+.field textarea{height:80px; resize:vertical; line-height:1.7;}
+.field select{cursor:pointer; -webkit-appearance:none;}
+.field select option{background:var(--bg2);}
+
+/* Color preview */
+.color-row{display:flex; gap:8px; align-items:center;}
+.color-swatch{
+  width:32px; height:32px; border-radius:4px;
+  border:1px solid var(--border); flex-shrink:0; cursor:pointer;
+}
+.field input[type="color"]{
+  width:36px; height:36px; padding:2px; cursor:pointer;
+  border-radius:4px; flex-shrink:0;
+}
+
+/* Image upload area */
+.upload-zone{
+  border:1.5px dashed var(--border2); border-radius:8px;
+  padding:28px; text-align:center; cursor:pointer;
+  transition:all 0.2s; position:relative; overflow:hidden;
+}
+.upload-zone:hover{background:var(--gold-dim); border-color:var(--gold);}
+.upload-zone input[type="file"]{
+  position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;
+}
+.upload-icon{font-size:28px; margin-bottom:10px;}
+.upload-label{font-size:13px; color:var(--text2);}
+.upload-sub{font-size:11px; color:var(--text3); margin-top:4px;}
+
+.image-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:12px; margin-top:16px;}
+.image-item{
+  aspect-ratio:4/3; border-radius:6px; overflow:hidden;
+  position:relative; background:var(--surface); border:1px solid var(--border);
+  cursor:pointer; group: true;
+}
+.image-item img{width:100%; height:100%; object-fit:cover; display:block;}
+.image-item-placeholder{
+  width:100%; height:100%; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:6px;
+  color:var(--text3); font-size:11px;
+}
+.image-item-overlay{
+  position:absolute; inset:0;
+  background:rgba(0,0,0,0.7);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  opacity:0; transition:opacity 0.2s;
+}
+.image-item:hover .image-item-overlay{opacity:1;}
+.image-item-overlay button{
+  background:var(--bg2); color:var(--text); border:none;
+  padding:5px 10px; border-radius:4px; font-size:11px; cursor:pointer;
+}
+.image-item-overlay .del-btn{color:var(--red); background:var(--red-dim);}
+.image-tag{
+  position:absolute; top:6px; left:6px;
+  background:var(--gold); color:#000;
+  font-size:9px; padding:2px 6px; border-radius:3px; font-weight:600;
+}
+
+/* Vehicle table */
+.table-wrap{overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:13px;}
+th{
+  text-align:left; padding:10px 14px;
+  font-size:10px; letter-spacing:0.12em; text-transform:uppercase;
+  color:var(--text3); border-bottom:1px solid var(--border);
+  background:var(--bg3); font-weight:500;
+}
+td{padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.status-badge{
+  display:inline-flex; align-items:center; gap:5px;
+  font-size:11px; padding:3px 10px; border-radius:20px;
+}
+.status-on{background:var(--green-dim); color:var(--green);}
+.status-off{background:var(--surface2); color:var(--text3);}
+.status-dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+.price-cell{color:var(--gold); font-weight:500;}
+.type-cell{
+  font-size:11px; padding:2px 8px; border-radius:3px;
+  background:var(--blue-dim); color:var(--blue);
+}
+.action-btns{display:flex; gap:6px;}
+
+/* Stats row */
+.stats-row{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px;}
+.stat-card{
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:8px; padding:18px 20px;
+  display:flex; flex-direction:column; gap:4px;
+}
+.stat-card-num{font-size:26px; font-weight:500; color:var(--text); line-height:1;}
+.stat-card-label{font-size:11px; color:var(--text2); letter-spacing:0.05em;}
+.stat-card-delta{font-size:11px; margin-top:6px;}
+.delta-up{color:var(--green);}
+.delta-down{color:var(--red);}
+
+/* Add vehicle form */
+.modal-overlay{
+  position:fixed; inset:0; z-index:200;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
+  display:none; align-items:center; justify-content:center;
+}
+.modal-overlay.active{display:flex;}
+.modal{
+  background:var(--bg2); border:1px solid var(--border);
+  border-radius:10px; width:600px; max-width:95vw;
+  max-height:90vh; overflow-y:auto;
+  padding:28px; position:relative;
+  animation:slideUp 0.25s ease;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-title{font-size:16px; font-weight:600; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;}
+.modal-close{background:none; border:none; color:var(--text2); font-size:20px; cursor:pointer; transition:color 0.2s;}
+.modal-close:hover{color:var(--text);}
+
+/* Preview frame */
+.preview-bar{
+  background:var(--bg3); border:1px solid var(--border);
+  border-radius:8px; padding:12px 16px; margin-bottom:20px;
+  display:flex; align-items:center; gap:12px; font-size:12px;
+}
+.preview-dot{width:10px; height:10px; border-radius:50%;}
+.preview-dot.green{background:var(--green);}
+.preview-dot.off{background:var(--text3);}
+.preview-url{
+  flex:1; background:var(--surface); border:1px solid var(--border);
+  border-radius:4px; padding:5px 10px; color:var(--text2); font-size:12px;
+  font-family:var(--mono);
+}
+
+/* Tabs */
+.tabs{display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:20px;}
+.tab{
+  padding:10px 18px; font-size:13px; cursor:pointer;
+  color:var(--text2); border-bottom:2px solid transparent;
+  transition:all 0.2s; user-select:none;
+}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--gold); border-bottom-color:var(--gold);}
+
+/* Toggle */
+.toggle-row{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 0; border-bottom:1px solid var(--border);
+}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:13px;}
+.toggle-sub{font-size:11px; color:var(--text2); margin-top:2px;}
+.toggle{
+  width:40px; height:22px; background:var(--surface2);
+  border-radius:11px; position:relative; cursor:pointer;
+  transition:background 0.2s; flex-shrink:0;
+}
+.toggle.on{background:var(--green);}
+.toggle::after{
+  content:''; position:absolute; width:16px; height:16px;
+  background:#fff; border-radius:50%; top:3px; left:3px;
+  transition:left 0.2s;
+}
+.toggle.on::after{left:21px;}
+
+/* Color scheme */
+.color-scheme-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:12px;}
+.color-pick{
+  height:36px; border-radius:6px; cursor:pointer;
+  border:2px solid transparent; transition:all 0.2s;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; color:rgba(255,255,255,0.5);
+}
+.color-pick:hover{transform:scale(1.05);}
+.color-pick.selected{border-color:#fff;}
+
+/* Notification */
+.notif{
+  position:fixed; top:20px; right:20px; z-index:9999;
+  background:var(--bg2); border:1px solid var(--border2);
+  border-radius:8px; padding:14px 18px;
+  display:flex; align-items:center; gap:10px;
+  font-size:13px; transform:translateX(120%);
+  transition:transform 0.3s ease;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+}
+.notif.show{transform:translateX(0);}
+.notif-icon{color:var(--green); font-size:16px;}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:6px; height:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface2); border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* Responsive */
+@media(max-width:900px){
+  .sidebar{width:60px;}
+  .nav-item span,.logo-text,.logo-sub,.sidebar-section,.sidebar-footer{display:none;}
+  .logo-mark{margin:0 auto;}
+  .sidebar-logo{justify-content:center; padding:16px 0;}
+  .nav-item{justify-content:center; padding:12px; margin:2px;}
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .form-grid,.form-grid-3{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">臻</div>
+    <div>
+      <div class="logo-text">后台管理系统</div>
+      <div class="logo-sub">Admin Console v2.0</div>
+    </div>
+  </div>
+
+  <div class="sidebar-section">主要功能</div>
+  <div class="nav-item active" onclick="switchPanel('overview',this)">
+    <span class="nav-icon">📊</span><span>数据概览</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('brand',this)">
+    <span class="nav-icon">🏷️</span><span>品牌信息</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('contact',this)">
+    <span class="nav-icon">📞</span><span>联系方式</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('images',this)">
+    <span class="nav-icon">🖼️</span><span>图片管理</span>
+    <span class="nav-badge">6</span>
+  </div>
+
+  <div class="sidebar-section">车辆管理</div>
+  <div class="nav-item" onclick="switchPanel('vehicles',this)">
+    <span class="nav-icon">🚗</span><span>车辆列表</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('categories',this)">
+    <span class="nav-icon">📂</span><span>分类管理</span>
+  </div>
+
+  <div class="sidebar-section">系统设置</div>
+  <div class="nav-item" onclick="switchPanel('design',this)">
+    <span class="nav-icon">🎨</span><span>外观主题</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('seo',this)">
+    <span class="nav-icon">🔍</span><span>SEO 设置</span>
+  </div>
+  <div class="nav-item" onclick="switchPanel('settings',this)">
+    <span class="nav-icon">⚙️</span><span>系统设置</span>
+  </div>
+
+  <div class="sidebar-footer">
+    <strong>●</strong> 站点运行正常<br>
+    最后保存：刚刚
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div style="flex:1">
+      <div class="topbar-title" id="topbarTitle">数据概览</div>
+    </div>
+    <div class="topbar-actions">
+      <span class="save-status" id="saveStatus">✓ 已保存</span>
+      <button class="btn btn-ghost" onclick="previewSite()">👁 预览网站</button>
+      <button class="btn btn-gold" onclick="publishAll()">🚀 发布更新</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ① 数据概览 -->
+    <div class="panel active" id="panel-overview">
+      <div class="preview-bar">
+        <div class="preview-dot green"></div>
+        <span style="color:var(--text2)">网站状态：</span>
+        <span style="color:var(--green)">正常运行</span>
+        <input class="preview-url" readonly value="https://www.zhenchiauto.com">
+        <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px;" onclick="previewSite()">打开预览</button>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-num">850</div>
+          <div class="stat-card-label">在售车辆总数</div>
+          <div class="stat-card-delta delta-up">↑ 12 本月新增</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">48</div>
+          <div class="stat-card-label">今日询盘数</div>
+          <div class="stat-card-delta delta-up">↑ 8% 环比增长</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">1,240</div>
+          <div class="stat-card-label">今日访客</div>
+          <div class="stat-card-delta delta-up">↑ 23% vs 昨日</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-num">4.9★</div>
+          <div class="stat-card-label">Google 评分</div>
+          <div class="stat-card-delta" style="color:var(--text2)">基于 328 条评价</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span class="card-title-icon">⚡</span> 快速操作</div>
+            <div class="card-desc">常用功能入口</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+            <button class="btn btn-ghost" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;height:auto;font-size:13px;" onclick="switchPanel('brand',document.querySelector('[onclick*=brand]'))">
+              <span style="font-size:24px;">🏷️</span>修改品牌信息
+            </button>
+            <button class="btn btn-ghost" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;height:auto;font-size:13px;" onclick="switchPanel('contact',document.querySelector('[onclick*=contact]'))">
+              <span style="font-size:24px;">📞</span>更新联系方式
+            </button>
+            <button class="btn btn-ghost" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;height:auto;font-size:13px;" onclick="switchPanel('images',document.querySelector('[onclick*=images]'))">
+              <span style="font-size:24px;">🖼️</span>管理图片素材
+            </button>
+            <button class="btn btn-ghost" style="padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;height:auto;font-size:13px;" onclick="openAddVehicle()">
+              <span style="font-size:24px;">➕</span>添加新车辆
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📋</span> 最近询盘</div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 12px;">查看全部</button>
+        </div>
+        <div class="card-body" style="padding:0">
+          <table>
+            <thead><tr><th>时间</th><th>客户姓名</th><th>手机号</th><th>感兴趣车型</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--text2)">今天 14:32</td><td>张先生</td><td>138****8899</td><td>保时捷 911 Carrera 4S</td><td><span class="status-badge status-on"><span class="status-dot"></span>已跟进</span></td></tr>
+              <tr><td style="color:var(--text2)">今天 13:18</td><td>李女士</td><td>186****2233</td><td>杜卡迪 Panigale V4</td><td><span class="status-badge status-off"><span class="status-dot"></span>待处理</span></td></tr>
+              <tr><td style="color:var(--text2)">今天 11:05</td><td>王总</td><td>139****4455</td><td>圣捷 Manhattan 游艇</td><td><span class="status-badge status-on"><span class="status-dot"></span>已跟进</span></td></tr>
+              <tr><td style="color:var(--text2)">昨天 16:40</td><td>陈先生</td><td>158****6677</td><td>奔驰 G63 AMG</td><td><span class="status-badge status-off"><span class="status-dot"></span>待处理</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ② 品牌信息 -->
+    <div class="panel" id="panel-brand">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span class="card-title-icon">🏷️</span> 品牌基本信息</div>
+            <div class="card-desc">修改后点击右上角"发布更新"即可同步到前台网站</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>品牌名称（主标）</label>
+              <input type="text" id="brandName" value="臻" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>品牌名称（副标）</label>
+              <input type="text" id="brandSub" value="驰汽车" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>网站标题（浏览器标签）</label>
+              <input type="text" id="siteTitle" value="臻驰汽车 — 新车 · 二手车 · 摩托车 · 游艇" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>Hero 副标题标语</label>
+              <input type="text" id="heroEyebrow" value="臻选汽车 · 品质之选" oninput="markChanged()">
+            </div>
+            <div class="field form-full">
+              <label>品牌介绍（页脚展示）</label>
+              <textarea id="brandDesc" oninput="markChanged()">专业提供豪华新车、认证二手车、高性能摩托车及私人游艇销售服务，深耕行业12年，服务精英客户群体。</textarea>
+            </div>
+            <div class="field">
+              <label>成立年份</label>
+              <input type="text" id="brandYear" value="2012" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>在售车辆数（Hero 统计）</label>
+              <input type="text" id="statVehicles" value="850+" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>行业经验年数</label>
+              <input type="text" id="statYears" value="12年" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>客户评分</label>
+              <input type="text" id="statRating" value="4.9★" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🖼️</span> Logo 设置</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>Logo 图片</label>
+              <div class="upload-zone" style="padding:16px">
+                <input type="file" accept="image/*" onchange="handleLogoUpload(event)">
+                <div class="upload-icon">🏷️</div>
+                <div class="upload-label">点击上传 Logo 图片</div>
+                <div class="upload-sub">建议 SVG / PNG 透明背景，200×60px</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Favicon 图标</label>
+              <div class="upload-zone" style="padding:16px">
+                <input type="file" accept="image/*" onchange="handleFaviconUpload(event)">
+                <div class="upload-icon">⭐</div>
+                <div class="upload-label">点击上传 Favicon</div>
+                <div class="upload-sub">建议 32×32px ICO / PNG</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-ghost" onclick="resetBrand()">↺ 重置</button>
+        <button class="btn btn-gold" onclick="saveBrand()">✓ 保存品牌信息</button>
+      </div>
+    </div>
+
+    <!-- ③ 联系方式 -->
+    <div class="panel" id="panel-contact">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span class="card-title-icon">📞</span> 联系方式管理</div>
+            <div class="card-desc">修改联系电话、微信、地址及营业时间</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>400 客服电话</label>
+              <input type="text" id="phone400" value="400-800-1234" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>销售热线（备用）</label>
+              <input type="text" id="phoneSales" value="021-8888-9999" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>微信公众号 / 客服号</label>
+              <input type="text" id="wechat" value="ZhenChiAuto" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>邮箱地址</label>
+              <input type="email" id="email" value="info@zhenchiauto.com" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📍</span> 展厅地址</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>城市</label>
+              <input type="text" id="city" value="上海市" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>区/县</label>
+              <input type="text" id="district" value="静安区" oninput="markChanged()">
+            </div>
+            <div class="field form-full">
+              <label>详细地址</label>
+              <input type="text" id="address" value="臻驰大道888号臻驰汽车广场" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>Google 地图链接（可选）</label>
+              <input type="text" id="mapUrl" value="" placeholder="https://maps.google.com/..." oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>高德 / 百度地图链接（可选）</label>
+              <input type="text" id="mapUrlCN" value="" placeholder="https://maps.baidu.com/..." oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🕐</span> 营业时间</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid-3">
+            <div class="field">
+              <label>周一至周五 开始</label>
+              <input type="time" id="weekdayOpen" value="09:00" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>周一至周五 结束</label>
+              <input type="time" id="weekdayClose" value="19:00" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>周六同周一至五</label>
+              <select id="satSame" onchange="markChanged()">
+                <option value="yes">是</option>
+                <option value="no">否（单独设置）</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>周日 开始</label>
+              <input type="time" id="sunOpen" value="10:00" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>周日 结束</label>
+              <input type="time" id="sunClose" value="17:00" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>节假日说明</label>
+              <input type="text" id="holiday" value="节假日照常营业" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">💬</span> 社交媒体账号</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>微博</label>
+              <input type="text" id="weibo" value="@臻驰汽车官方" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>抖音号</label>
+              <input type="text" id="douyin" value="zhenchiauto" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>小红书</label>
+              <input type="text" id="xiaohongshu" value="臻驰汽车" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>视频号</label>
+              <input type="text" id="shipinhao" value="臻驰汽车视频号" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-ghost">↺ 重置</button>
+        <button class="btn btn-gold" onclick="saveContact()">✓ 保存联系方式</button>
+      </div>
+    </div>
+
+    <!-- ④ 图片管理 -->
+    <div class="panel" id="panel-images">
+      <div class="tabs">
+        <div class="tab active" onclick="switchImageTab('hero',this)">Hero 主图</div>
+        <div class="tab" onclick="switchImageTab('cats',this)">分类配图</div>
+        <div class="tab" onclick="switchImageTab('vehicles',this)">车辆图片</div>
+        <div class="tab" onclick="switchImageTab('banners',this)">广告横幅</div>
+      </div>
+
+      <!-- Hero 主图 -->
+      <div id="img-tab-hero">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><span class="card-title-icon">🖼️</span> Hero 首屏主图</div>
+              <div class="card-desc">建议尺寸：1920×1080px，支持 JPG / PNG / WebP，最大 5MB</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="upload-zone" id="heroUploadZone">
+              <input type="file" accept="image/*" onchange="handleImageUpload(event,'hero')">
+              <div class="upload-icon">🚗</div>
+              <div class="upload-label">拖拽或点击上传 Hero 背景图</div>
+              <div class="upload-sub">1920×1080px · JPG/PNG/WebP · 最大 5MB</div>
+            </div>
+            <div class="image-grid" id="heroImageGrid">
+              <div class="image-item">
+                <div class="image-item-placeholder">
+                  <span style="font-size:24px">🚘</span>
+                  <span>暂无主图</span>
+                </div>
+                <div class="image-tag">当前使用</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 分类配图 -->
+      <div id="img-tab-cats" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="card-title-icon">📂</span> 四大类别配图</div>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+              <div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">🚗 全新新车</div>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'cat-new')">
+                  <div class="upload-icon" style="font-size:20px">+</div>
+                  <div class="upload-label" style="font-size:12px">上传新车分类图</div>
+                  <div class="upload-sub">建议 600×800px</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">✦ 认证二手车</div>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'cat-used')">
+                  <div class="upload-icon" style="font-size:20px">+</div>
+                  <div class="upload-label" style="font-size:12px">上传二手车分类图</div>
+                  <div class="upload-sub">建议 600×800px</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">🏍 摩托车</div>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'cat-moto')">
+                  <div class="upload-icon" style="font-size:20px">+</div>
+                  <div class="upload-label" style="font-size:12px">上传摩托车分类图</div>
+                  <div class="upload-sub">建议 600×800px</div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">⛵ 游艇/快艇</div>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'cat-yacht')">
+                  <div class="upload-icon" style="font-size:20px">+</div>
+                  <div class="upload-label" style="font-size:12px">上传游艇分类图</div>
+                  <div class="upload-sub">建议 600×800px</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 车辆图片 -->
+      <div id="img-tab-vehicles" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><span class="card-title-icon">🚙</span> 车辆详情图片库</div>
+              <div class="card-desc">每辆车建议上传8张以上高清实拍图</div>
+            </div>
+            <button class="btn btn-gold" style="font-size:12px;" onclick="openAddVehicle()">+ 添加新车辆</button>
+          </div>
+          <div class="card-body">
+            <div class="upload-zone">
+              <input type="file" accept="image/*" multiple onchange="handleBatchUpload(event)">
+              <div class="upload-icon">📸</div>
+              <div class="upload-label">批量上传车辆图片</div>
+              <div class="upload-sub">支持同时选择多张图片 · JPG/PNG/WebP</div>
+            </div>
+            <div class="image-grid" id="vehicleImageGrid" style="margin-top:16px">
+              <!-- Images rendered by JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 广告横幅 -->
+      <div id="img-tab-banners" style="display:none">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="card-title-icon">📢</span> 广告横幅 / 弹窗图片</div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="field">
+                <label>促销横幅（页面顶部通知栏）</label>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'banner-top')">
+                  <div class="upload-icon" style="font-size:20px">📢</div>
+                  <div class="upload-label" style="font-size:12px">上传顶部横幅图</div>
+                  <div class="upload-sub">建议 1200×80px</div>
+                </div>
+              </div>
+              <div class="field">
+                <label>弹窗广告图（进站弹出）</label>
+                <div class="upload-zone" style="padding:16px">
+                  <input type="file" accept="image/*" onchange="handleImageUpload(event,'popup')">
+                  <div class="upload-icon" style="font-size:20px">💬</div>
+                  <div class="upload-label" style="font-size:12px">上传弹窗图片</div>
+                  <div class="upload-sub">建议 600×400px</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ 车辆列表 -->
+    <div class="panel" id="panel-vehicles">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title"><span class="card-title-icon">🚗</span> 车辆管理</div>
+            <div class="card-desc">管理所有在售车辆信息</div>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input type="text" placeholder="搜索车型..." style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:5px;font-size:12px;outline:none;width:160px;">
+            <button class="btn btn-gold" onclick="openAddVehicle()">+ 添加车辆</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table id="vehicleTable">
+              <thead>
+                <tr>
+                  <th>品牌/车型</th>
+                  <th>类别</th>
+                  <th>年份</th>
+                  <th>价格</th>
+                  <th>状态</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="vehicleTbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑥ 分类管理 -->
+    <div class="panel" id="panel-categories">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📂</span> 分类名称与显示设置</div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">🚗 全新新车</div>
+                <div class="toggle-sub">副标签：<input type="text" value="原厂全新 · 官方授权" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:3px;font-size:12px;width:200px;outline:none;margin-left:6px;"></div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">✦ 认证二手车</div>
+                <div class="toggle-sub">副标签：<input type="text" value="认证检测 · 品质保证" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:3px;font-size:12px;width:200px;outline:none;margin-left:6px;"></div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">🏍 摩托车</div>
+                <div class="toggle-sub">副标签：<input type="text" value="公路 · 赛道 · 巡航" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:3px;font-size:12px;width:200px;outline:none;margin-left:6px;"></div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">⛵ 游艇 &amp; 快艇</div>
+                <div class="toggle-sub">副标签：<input type="text" value="游艇 · 快艇 · 私人定制" style="background:var(--surface);border:1px solid var(--border);color:var(--text);padding:3px 8px;border-radius:3px;font-size:12px;width:200px;outline:none;margin-left:6px;"></div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn btn-gold" onclick="showNotif('分类设置已保存')">✓ 保存分类设置</button>
+      </div>
+    </div>
+
+    <!-- ⑦ 外观主题 -->
+    <div class="panel" id="panel-design">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🎨</span> 主题配色</div>
+        </div>
+        <div class="card-body">
+          <div class="field" style="margin-bottom:16px">
+            <label>选择预设主题</label>
+            <div class="color-scheme-grid">
+              <div class="color-pick selected" style="background:linear-gradient(135deg,#0A0A0A,#C9A84C)" onclick="applyTheme('gold',this)">金黑</div>
+              <div class="color-pick" style="background:linear-gradient(135deg,#0D1117,#3B82F6)" onclick="applyTheme('blue',this)">深蓝</div>
+              <div class="color-pick" style="background:linear-gradient(135deg,#0A0A0A,#E5E7EB)" onclick="applyTheme('silver',this)">银白</div>
+              <div class="color-pick" style="background:linear-gradient(135deg,#1A0A0A,#EF4444)" onclick="applyTheme('red',this)">暗红</div>
+              <div class="color-pick" style="background:linear-gradient(135deg,#0A1A0A,#22C55E)" onclick="applyTheme('green',this)">墨绿</div>
+            </div>
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label>主色调（品牌金色）</label>
+              <div class="color-row">
+                <input type="color" id="colorPrimary" value="#C9A84C" onchange="updateColor(this)">
+                <input type="text" value="#C9A84C" style="font-family:var(--mono);font-size:12px" id="colorPrimaryHex" oninput="syncColor(this)">
+              </div>
+            </div>
+            <div class="field">
+              <label>背景色</label>
+              <div class="color-row">
+                <input type="color" id="colorBg" value="#0A0A0A" onchange="updateColor(this)">
+                <input type="text" value="#0A0A0A" style="font-family:var(--mono);font-size:12px" id="colorBgHex" oninput="syncColor(this)">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">📝</span> 字体设置</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>正文字体</label>
+              <select id="fontBody" onchange="markChanged()">
+                <option value="pingfang" selected>苹方 PingFang SC（推荐）</option>
+                <option value="microsoft">微软雅黑 Microsoft YaHei</option>
+                <option value="noto">思源黑体 Noto Sans SC</option>
+                <option value="alibaba">阿里巴巴普惠体</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>标题字体</label>
+              <select id="fontTitle" onchange="markChanged()">
+                <option value="cormorant">Cormorant Garamond（当前）</option>
+                <option value="playfair">Playfair Display</option>
+                <option value="noto-serif">思源宋体 Noto Serif SC</option>
+                <option value="zcool">ZCOOL QingKe HuangYou</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-ghost">↺ 恢复默认</button>
+        <button class="btn btn-gold" onclick="showNotif('外观主题已保存')">✓ 保存主题</button>
+      </div>
+    </div>
+
+    <!-- ⑧ SEO -->
+    <div class="panel" id="panel-seo">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🔍</span> SEO 搜索优化设置</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid" style="gap:20px">
+            <div class="field form-full">
+              <label>Meta 标题</label>
+              <input type="text" id="metaTitle" value="臻驰汽车 | 上海豪华新车、认证二手车、摩托车、游艇经销商" oninput="markChanged()">
+              <div style="font-size:11px;color:var(--text3);margin-top:4px;">建议不超过60个字符，当前：<span id="metaTitleLen">27</span>/60</div>
+            </div>
+            <div class="field form-full">
+              <label>Meta 描述</label>
+              <textarea id="metaDesc" style="height:70px" oninput="updateMetaLen(this)">上海臻驰汽车集团，专业经营豪华新车、认证二手车、高性能摩托车及游艇。12年行业经验，850+在售车辆，透明定价，灵活金融方案。</textarea>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px;">建议不超过160个字符，当前：<span id="metaDescLen">65</span>/160</div>
+            </div>
+            <div class="field form-full">
+              <label>关键词（英文逗号分隔）</label>
+              <input type="text" id="metaKeywords" value="豪华汽车,二手车,保时捷,奔驰,宝马,上海汽车经销商,游艇,摩托车" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>ICP 备案号</label>
+              <input type="text" id="icp" value="沪ICP备XXXXXXXX号" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>公安备案号（可选）</label>
+              <input type="text" id="mps" value="" placeholder="沪公网安备XXXXXXXXXX号" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>百度站点验证码</label>
+              <input type="text" id="baiduVerify" value="" placeholder="baidu-site-verification=XXXXXX" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>Google Analytics ID</label>
+              <input type="text" id="gaId" value="" placeholder="G-XXXXXXXXXX" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;">
+        <button class="btn btn-gold" onclick="showNotif('SEO 设置已保存')">✓ 保存 SEO 设置</button>
+      </div>
+    </div>
+
+    <!-- ⑨ 系统设置 -->
+    <div class="panel" id="panel-settings">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">⚙️</span> 功能开关</div>
+        </div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">询盘弹窗表单</div>
+              <div class="toggle-sub">访客点击"预约看车"时显示弹窗表单</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">微信悬浮按钮</div>
+              <div class="toggle-sub">页面右下角显示微信咨询浮窗</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">车辆搜索筛选栏</div>
+              <div class="toggle-sub">首页显示车型搜索筛选区域</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">客户评价模块</div>
+              <div class="toggle-sub">首页显示客户真实口碑评价</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">自定义光标</div>
+              <div class="toggle-sub">页面使用金色品牌自定义鼠标光标</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">维护模式</div>
+              <div class="toggle-sub">开启后访客仅见维护提示页，管理员正常访问</div>
+            </div>
+            <div class="toggle" onclick="this.classList.toggle('on')"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="card-title-icon">🔐</span> 管理员账号</div>
+        </div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="field">
+              <label>管理员用户名</label>
+              <input type="text" value="admin" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>当前密码</label>
+              <input type="password" placeholder="输入当前密码" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>新密码</label>
+              <input type="password" placeholder="留空则不修改" oninput="markChanged()">
+            </div>
+            <div class="field">
+              <label>确认新密码</label>
+              <input type="password" placeholder="再次输入新密码" oninput="markChanged()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;gap:10px;">
+        <button class="btn btn-red" onclick="if(confirm('确认清除所有本地数据？'))showNotif('已清除缓存')">🗑 清除缓存</button>
+        <button class="btn btn-gold" onclick="showNotif('系统设置已保存')">✓ 保存设置</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- 添加/编辑车辆弹窗 -->
+<div class="modal-overlay" id="vehicleModal" onclick="if(event.target===this)closeVehicleModal()">
+  <div class="modal">
+    <div class="modal-title">
+      <span id="modalTitleText">添加新车辆</span>
+      <button class="modal-close" onclick="closeVehicleModal()">×</button>
+    </div>
+    <div class="form-grid" style="gap:14px">
+      <div class="field">
+        <label>品牌</label>
+        <input type="text" id="vBrand" placeholder="如：保时捷 Porsche">
+      </div>
+      <div class="field">
+        <label>车型名称</label>
+        <input type="text" id="vModel" placeholder="如：911 Carrera 4S">
+      </div>
+      <div class="field">
+        <label>类别</label>
+        <select id="vCategory">
+          <option>全新新车</option>
+          <option>认证二手车</option>
+          <option>摩托车</option>
+          <option>游艇/快艇</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>年份</label>
+        <input type="text" id="vYear" placeholder="如：2024">
+      </div>
+      <div class="field">
+        <label>价格（含单位）</label>
+        <input type="text" id="vPrice" placeholder="如：¥ 158 万起">
+      </div>
+      <div class="field">
+        <label>状态</label>
+        <select id="vStatus">
+          <option value="on">上架中</option>
+          <option value="off">已下架</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>参数1（如 发动机）</label>
+        <input type="text" id="vSpec1Label" placeholder="发动机">
+      </div>
+      <div class="field">
+        <label>参数1 内容</label>
+        <input type="text" id="vSpec1Val" placeholder="3.0T 双涡轮">
+      </div>
+      <div class="field">
+        <label>参数2</label>
+        <input type="text" id="vSpec2Label" placeholder="功率">
+      </div>
+      <div class="field">
+        <label>参数2 内容</label>
+        <input type="text" id="vSpec2Val" placeholder="450 马力">
+      </div>
+      <div class="field form-full">
+        <label>车辆图片</label>
+        <div class="upload-zone" style="padding:14px">
+          <input type="file" accept="image/*" multiple onchange="handleVehicleImgUpload(event)">
+          <div class="upload-icon" style="font-size:20px">📷</div>
+          <div class="upload-label" style="font-size:12px">上传车辆图片（可多选）</div>
+        </div>
+      </div>
+      <div class="field form-full">
+        <label>备注说明</label>
+        <textarea id="vNote" placeholder="可填写特殊配置、车况说明等..." style="height:60px"></textarea>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeVehicleModal()">取消</button>
+      <button class="btn btn-gold" onclick="saveVehicle()">✓ 保存车辆</button>
+    </div>
+  </div>
+</div>
+
+<!-- 通知 -->
+<div class="notif" id="notif">
+  <span class="notif-icon">✓</span>
+  <span id="notifText">保存成功</span>
+</div>
+
+<script>
+// ── 初始化车辆数据 ──
+let vehicles = [
+  {id:1, brand:'保时捷 Porsche', model:'911 Carrera 4S', category:'全新新车', year:'2024', price:'¥ 158 万起', status:'on', specs:'3.0T / 450马力 / 3.4秒'},
+  {id:2, brand:'宝马 BMW', model:'M5 Competition', category:'认证二手车', year:'2023', price:'¥ 92 万', status:'on', specs:'1.3万公里 / 617马力'},
+  {id:3, brand:'杜卡迪 Ducati', model:'Panigale V4 S', category:'摩托车', year:'2024', price:'¥ 26 万起', status:'on', specs:'1103cc / 214马力'},
+  {id:4, brand:'圣捷 Sunseeker', model:'Manhattan 68', category:'游艇/快艇', year:'2023', price:'¥ 1,700 万', status:'on', specs:'20.7m / 32节'},
+  {id:5, brand:'奔驰 Mercedes-Benz', model:'G 63 AMG', category:'认证二手车', year:'2022', price:'¥ 175 万', status:'off', specs:'2.3万公里 / 577马力'},
+  {id:6, brand:'哈雷 Harley-Davidson', model:'Road Glide Ultra', category:'摩托车', year:'2024', price:'¥ 22 万起', status:'on', specs:'Milwaukee-8 114 / 165N·m'},
+];
+let editingId = null;
+
+function renderVehicles(){
+  const tbody = document.getElementById('vehicleTbody');
+  tbody.innerHTML = vehicles.map(v => `
+    <tr>
+      <td>
+        <div style="font-weight:500">${v.brand}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">${v.model}</div>
+      </td>
+      <td><span class="type-cell">${v.category}</span></td>
+      <td>${v.year}</td>
+      <td class="price-cell">${v.price}</td>
+      <td>
+        <span class="status-badge ${v.status==='on'?'status-on':'status-off'}">
+          <span class="status-dot"></span>${v.status==='on'?'上架中':'已下架'}
+        </span>
+      </td>
+      <td>
+        <div class="action-btns">
+          <button class="btn btn-ghost" style="font-size:11px;padding:4px 10px" onclick="editVehicle(${v.id})">编辑</button>
+          <button class="btn" style="font-size:11px;padding:4px 10px;background:var(--surface2);color:var(--text2)" onclick="toggleVehicle(${v.id})">${v.status==='on'?'下架':'上架'}</button>
+          <button class="btn btn-red" style="font-size:11px;padding:4px 10px" onclick="deleteVehicle(${v.id})">删除</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openAddVehicle(){
+  editingId = null;
+  document.getElementById('modalTitleText').textContent = '添加新车辆';
+  ['vBrand','vModel','vYear','vPrice','vSpec1Label','vSpec1Val','vSpec2Label','vSpec2Val','vNote'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('vehicleModal').classList.add('active');
+}
+function closeVehicleModal(){ document.getElementById('vehicleModal').classList.remove('active'); }
+
+function editVehicle(id){
+  const v = vehicles.find(x=>x.id===id);
+  editingId = id;
+  document.getElementById('modalTitleText').textContent = '编辑车辆';
+  document.getElementById('vBrand').value = v.brand;
+  document.getElementById('vModel').value = v.model;
+  document.getElementById('vCategory').value = v.category;
+  document.getElementById('vYear').value = v.year;
+  document.getElementById('vPrice').value = v.price;
+  document.getElementById('vStatus').value = v.status;
+  document.getElementById('vehicleModal').classList.add('active');
+}
+
+function saveVehicle(){
+  const v = {
+    brand: document.getElementById('vBrand').value || '未填写品牌',
+    model: document.getElementById('vModel').value || '未填写车型',
+    category: document.getElementById('vCategory').value,
+    year: document.getElementById('vYear').value || '2024',
+    price: document.getElementById('vPrice').value || '面议',
+    status: document.getElementById('vStatus').value,
+    specs: `${document.getElementById('vSpec1Label').value} ${document.getElementById('vSpec1Val').value}`
+  };
+  if(editingId){
+    const idx = vehicles.findIndex(x=>x.id===editingId);
+    vehicles[idx] = {...vehicles[idx], ...v};
+  } else {
+    v.id = Date.now();
+    vehicles.push(v);
+  }
+  renderVehicles();
+  closeVehicleModal();
+  showNotif(editingId ? '车辆信息已更新' : '新车辆已添加');
+}
+
+function deleteVehicle(id){
+  if(!confirm('确认删除该车辆？此操作不可撤销')) return;
+  vehicles = vehicles.filter(v=>v.id!==id);
+  renderVehicles();
+  showNotif('车辆已删除');
+}
+
+function toggleVehicle(id){
+  const v = vehicles.find(x=>x.id===id);
+  v.status = v.status==='on'?'off':'on';
+  renderVehicles();
+  showNotif(v.status==='on'?'车辆已上架':'车辆已下架');
+}
+
+// ── 面板切换 ──
+const panelTitles = {
+  overview:'数据概览', brand:'品牌信息管理', contact:'联系方式管理',
+  images:'图片素材管理', vehicles:'车辆管理', categories:'分类管理',
+  design:'外观主题设置', seo:'SEO 搜索优化', settings:'系统设置'
+};
+
+function switchPanel(name, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if(el) el.classList.add('active');
+  document.getElementById('topbarTitle').textContent = panelTitles[name]||name;
+}
+
+// ── 图片标签切换 ──
+function switchImageTab(name, el){
+  document.querySelectorAll('[id^="img-tab-"]').forEach(t=>t.style.display='none');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('img-tab-'+name).style.display='block';
+  el.classList.add('active');
+}
+
+// ── 图片上传 ──
+function handleImageUpload(e, zone){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    if(zone==='hero'){
+      const grid = document.getElementById('heroImageGrid');
+      grid.innerHTML = `
+        <div class="image-item">
+          <img src="${ev.target.result}" alt="Hero">
+          <div class="image-tag">当前使用</div>
+          <div class="image-item-overlay">
+            <button onclick="this.closest('.image-item').remove()">更换</button>
+            <button class="del-btn" onclick="this.closest('.image-item').remove()">删除</button>
+          </div>
+        </div>`;
+    }
+    showNotif(`图片已上传：${file.name}`);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handleBatchUpload(e){
+  const files = Array.from(e.target.files);
+  const grid = document.getElementById('vehicleImageGrid');
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const item = document.createElement('div');
+      item.className = 'image-item';
+      item.innerHTML = `
+        <img src="${ev.target.result}" alt="">
+        <div class="image-item-overlay">
+          <button onclick="this.closest('.image-item').remove()">查看</button>
+          <button class="del-btn" onclick="this.closest('.image-item').remove()">删除</button>
+        </div>`;
+      grid.appendChild(item);
+    };
+    reader.readAsDataURL(file);
+  });
+  showNotif(`已上传 ${files.length} 张图片`);
+}
+
+function handleLogoUpload(e){ if(e.target.files[0]) showNotif('Logo 已上传，发布后生效'); }
+function handleFaviconUpload(e){ if(e.target.files[0]) showNotif('Favicon 已上传，发布后生效'); }
+function handleVehicleImgUpload(e){ if(e.target.files.length) showNotif(`已选择 ${e.target.files.length} 张图片`); }
+
+// ── 保存操作 ──
+function markChanged(){ document.getElementById('saveStatus').classList.remove('show'); }
+
+function saveBrand(){
+  showNotif('品牌信息已保存，点击"发布更新"同步到网站');
+  document.getElementById('saveStatus').classList.add('show');
+  setTimeout(()=>document.getElementById('saveStatus').classList.remove('show'), 3000);
+}
+
+function saveContact(){
+  showNotif('联系方式已保存');
+  document.getElementById('saveStatus').classList.add('show');
+  setTimeout(()=>document.getElementById('saveStatus').classList.remove('show'), 3000);
+}
+
+function resetBrand(){
+  if(confirm('确认恢复品牌信息到默认值？')) showNotif('已恢复默认品牌信息');
+}
+
+function publishAll(){
+  showNotif('🚀 已发布更新，网站内容已同步');
+  document.getElementById('saveStatus').classList.add('show');
+  setTimeout(()=>document.getElementById('saveStatus').classList.remove('show'), 4000);
+}
+
+function previewSite(){ showNotif('已在新窗口打开网站预览'); }
+
+// ── 颜色 ──
+function updateColor(el){ el.nextElementSibling.value = el.value; markChanged(); }
+function syncColor(el){ const col = el.previousElementSibling; if(/^#[0-9A-Fa-f]{6}$/.test(el.value)) col.value=el.value; markChanged(); }
+function applyTheme(name, el){
+  document.querySelectorAll('.color-pick').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  showNotif(`已切换到"${el.textContent}"主题，点击保存生效`);
+}
+
+// ── 通知 ──
+let notifTimer;
+function showNotif(msg){
+  const n = document.getElementById('notif');
+  document.getElementById('notifText').textContent = msg;
+  n.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(()=>n.classList.remove('show'), 3000);
+}
+
+// ── SEO 字数计数 ──
+function updateMetaLen(el){
+  document.getElementById('metaDescLen').textContent = el.value.length;
+  markChanged();
+}
+document.getElementById('metaTitle').addEventListener('input', function(){
+  document.getElementById('metaTitleLen').textContent = this.value.length;
+});
+
+// ── 初始化 ──
+renderVehicles();
+
+// 初始化车辆图片示例
+const sampleVehicleImages = ['🚗 保时捷 911','🔵 BMW M5','🏍 Ducati V4','⛵ Sunseeker 68','🚙 奔驰 G63','🏍 哈雷 Glide'];
+const vGrid = document.getElementById('vehicleImageGrid');
+sampleVehicleImages.forEach(label => {
+  const item = document.createElement('div');
+  item.className = 'image-item';
+  item.innerHTML = `
+    <div class="image-item-placeholder">
+      <span style="font-size:20px">🖼️</span>
+      <span style="font-size:10px;text-align:center">${label}</span>
+    </div>
+    <div class="image-item-overlay">
+      <button onclick="this.closest('.image-item').innerHTML='<div class=image-item-placeholder><span>已替换</span></div>'">替换</button>
+      <button class="del-btn" onclick="this.closest('.image-item').remove()">删除</button>
+    </div>`;
+  vGrid.appendChild(item);
+});
+</script>
+</body>
+</html>
